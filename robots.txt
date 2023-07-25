@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Allow: /archives/
+Allow: /categories/
+Allow: /tags/
+Allow: /about/
+Sitemap: https://blog.aiyi.space/sitemap.xml
+Sitemap: https://blog.aiyi.space/baidu_sitemap.xml

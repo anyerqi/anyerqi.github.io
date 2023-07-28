@@ -18,7 +18,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
 
-<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.aiyi.space","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.17.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blog.aiyi.space","root":"/","images":"/images","scheme":"Muse","darkmode":true,"version":"8.17.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":true,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
 
     <meta name="description" content="介绍经常使用Mac电脑的同学应该熟悉 quicklook,在 Finder中，选中一个文件，点击空格键就会弹出一个窗口，显示文件内容（在文件可以预览的情况下），如下图所示： 这个是Mac 提供的系统功能，自带支持office相关格式的文件，纯文本文件等格式，具体文件格式如下：  iWork and Microsoft Office documents Images Live Photos Text">
 <meta property="og:type" content="article">
@@ -32,9 +32,9 @@
 <meta property="article:published_time" content="2023-07-25T01:59:38.000Z">
 <meta property="article:modified_time" content="2023-07-25T14:22:38.491Z">
 <meta property="article:author" content="Hunter Lee">
-<meta property="article:tag" content="mac">
-<meta property="article:tag" content="quicklook">
 <meta property="article:tag" content="桌面端">
+<meta property="article:tag" content="quicklook">
+<meta property="article:tag" content="mac">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://blog.aiyi.space/2023/07/25/Mac-Quicklook%E5%BC%80%E5%8F%91/finder-quicklook.png">
 
@@ -257,7 +257,7 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>经常使用Mac电脑的同学应该熟悉 quicklook,在 Finder中，选中一个文件，点击空格键就会弹出一个窗口，显示文件内容（在文件可以预览的情况下），如下图所示：<br><img src="/2023/07/25/Mac-Quicklook%E5%BC%80%E5%8F%91/finder-quicklook.png" alt=" Mac Finder Quicklook window"></p>
+    <div class="post-body" itemprop="articleBody"><h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>经常使用Mac电脑的同学应该熟悉 quicklook,在 Finder中，选中一个文件，点击空格键就会弹出一个窗口，显示文件内容（在文件可以预览的情况下），如下图所示：<br><img data-src="/2023/07/25/Mac-Quicklook%E5%BC%80%E5%8F%91/finder-quicklook.png" alt=" Mac Finder Quicklook window"></p>
 <p>这个是Mac 提供的系统功能，自带支持office相关格式的文件，纯文本文件等格式，具体文件格式如下：</p>
 <ul>
 <li>iWork and Microsoft Office documents</li>
@@ -273,7 +273,7 @@
 <h3 id="简单接入"><a href="#简单接入" class="headerlink" title="简单接入"></a>简单接入</h3><p>根据官方文档可知，每个应用程序都有一个共享的单实例QLPreviewPanel，可用于显示预览内容<br>如果需求简单，只是显示一个预览窗口，可直接调用接口，传入要预览的文件路径，会自动显示预览窗口</p>
 <figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// QLItem 是 QLPreviewItem的实现</span></span><br><span class="line"><span class="keyword">let</span> qlItem <span class="operator">=</span> <span class="type">QLItem</span>(previewItemURL: .<span class="keyword">init</span>(<span class="type">URL</span>(fileURLWithPath: <span class="string">&quot; pathoffile.png&quot;</span>)))</span><br><span class="line"><span class="comment">// QLData 是QLPreviewPanelDataSource的实现，最佳实践是使用delegate，这里仅是demo</span></span><br><span class="line"><span class="keyword">let</span> qlData: <span class="type">QLData</span> <span class="operator">=</span> .<span class="keyword">init</span>(item: qlItem)</span><br><span class="line"><span class="type">QLPreviewPanel</span>.shared().dataSource <span class="operator">=</span> qlData;</span><br><span class="line"><span class="comment">// 显示到前台</span></span><br><span class="line"><span class="type">QLPreviewPanel</span>.shared().makeKeyAndOrderFront(<span class="literal">nil</span>)</span><br></pre></td></tr></table></figure>
 
-<p>效果如下图<br><img src="/2023/07/25/Mac-Quicklook%E5%BC%80%E5%8F%91/quicklook-demo.png" alt="mac quicklook demo"></p>
+<p>效果如下图<br><img data-src="/2023/07/25/Mac-Quicklook%E5%BC%80%E5%8F%91/quicklook-demo.png" alt="mac quicklook demo"></p>
 <h3 id="定制化"><a href="#定制化" class="headerlink" title="定制化"></a>定制化</h3><p>上面我们成功显示了预览窗口与文件内容，可能满足简单的需求，如果要更进一步，需要解决两个问题：  </p>
 <ol>
 <li>窗口定制：如上图所示，预览窗口是固定的样式，如果想定制化窗口，就不能使用默认的窗口，需要把内容渲染到自定义的窗口上</li>
@@ -310,9 +310,9 @@
 
     <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/mac/" rel="tag"># mac</a>
-              <a href="/tags/quicklook/" rel="tag"># quicklook</a>
               <a href="/tags/%E6%A1%8C%E9%9D%A2%E7%AB%AF/" rel="tag"># 桌面端</a>
+              <a href="/tags/quicklook/" rel="tag"># quicklook</a>
+              <a href="/tags/mac/" rel="tag"># mac</a>
           </div>
 
         
@@ -375,6 +375,7 @@
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.0.8/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
 <script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/algoliasearch/4.18.0/algoliasearch-lite.umd.js" integrity="sha256-V3GHVlMSAsogT3wL0OY/l4d3fRLa56gNzlnzdIMBIWg=" crossorigin="anonymous"></script>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Nodejs addon开发 | Hunter&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="为什么需要原生模块 在一些情况下，C++模块的性能要比js好 不得不用，nodejs无法完成的功能，我们在桌面开发中，需要调用操作系统的API,由于操作系统都提供了基于C\C++的API,所以可用C\C++实现">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nodejs addon开发">
+<meta property="og:url" content="https://blog.aiyi.space/2023/06/13/nodejs-addon/index.html">
+<meta property="og:site_name" content="Hunter&#39;s Blog">
+<meta property="og:description" content="为什么需要原生模块 在一些情况下，C++模块的性能要比js好 不得不用，nodejs无法完成的功能，我们在桌面开发中，需要调用操作系统的API,由于操作系统都提供了基于C\C++的API,所以可用C\C++实现">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-06-12T16:00:00.000Z">
+<meta property="article:modified_time" content="2025-01-17T07:42:39.429Z">
+<meta property="article:author" content="Hunter">
+<meta property="article:tag" content="桌面端">
+<meta property="article:tag" content="nodejs">
+<meta property="article:tag" content="C\C++">
+<meta name="twitter:card" content="summary">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.1.7/css/fork-awesome.min.css">
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hunter&#39;s Blog</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Tech Insights and Personal Reflections</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          
+            <a class="nav-icon" target="_blank" rel="noopener" href="https://github.com/anyerqi"><span class="fa fa-github"></span></a>
+          
+            <a class="nav-icon" target="_blank" rel="noopener" href="https://twitter.com/lmnghu"><span class="fa fa-twitter"></span></a>
+          
+        
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://blog.aiyi.space"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-nodejs-addon" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/06/13/nodejs-addon/" class="article-date">
+  <time class="dt-published" datetime="2023-06-12T16:00:00.000Z" itemprop="datePublished">2023-06-13</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%A1%8C%E9%9D%A2%E7%AB%AF/">桌面端</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Nodejs addon开发
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h3 id="为什么需要原生模块"><a href="#为什么需要原生模块" class="headerlink" title="为什么需要原生模块"></a>为什么需要原生模块</h3><ol>
+<li>在一些情况下，C++模块的性能要比js好</li>
+<li>不得不用，nodejs无法完成的功能，我们在桌面开发中，需要调用操作系统的API,由于操作系统都提供了基于C\C++的API,所以可用C\C++实现</li>
+</ol>
+<span id="more"></span>
+
+<h3 id="是什么"><a href="#是什么" class="headerlink" title="是什么"></a>是什么</h3><ol>
+<li>C++模块编译后，会生成后缀名为.node的文件</li>
+<li>.node文件本质上是动态链接库</li>
+</ol>
+<h3 id="开发方式"><a href="#开发方式" class="headerlink" title="开发方式"></a>开发方式</h3><ol>
+<li>直接使用nodejs API 和V8 API<ul>
+<li>问题：<ul>
+<li>强依赖于底层API,如果API发生变动，此模块就不能使用了，需要重新编写</li>
+<li>nodejs版本改变也要重新编译</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Native Abstractions for Node.js(NAN) Node.js 原生模块抽象接口<ul>
+<li>实质：是C++的宏，根据不同node版本展开</li>
+<li>好处：一般情况下，一次编码可兼容多个node版本</li>
+<li>问题：NAN做出改变时，也需要重新编码; 跟node版本绑定，一次编译只能用于特定node版本</li>
+</ul>
+</li>
+<li>N-API<ul>
+<li>实质：中间层，把Node.js 的所有底层数据结构全部抽象成 N-API 当中的接口，应用二进制接口（Application Binary Interface）</li>
+<li>目标：<ul>
+<li>以 C 的风格提供稳定 ABI 接口；</li>
+<li>消除 Node.js 版本的差异；</li>
+<li>消除 JavaScript 引擎的差异（如 Google V8、Microsoft ChakraCore 等）</li>
+<li>优点：面向ABI编码，一次编译可适用多个nodejs版本</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="构建"><a href="#构建" class="headerlink" title="构建"></a>构建</h3><ol>
+<li>build tools<br> 用于生成各个操作系统下的项目工程文件(windows 、mac、linux): Visual Studio、Xcode、Makefile<ul>
+<li>node-gyp</li>
+<li>CMake.js</li>
+</ul>
+</li>
+<li>Uploading precompiled binaries<br> 基于上面的build tools加入预编译包，当有适合的预编译包时，直接下载使用，省去编译，这样开发者不用安装各种编译工具。经常与CI&#x2F;CD结合<ul>
+<li>node-pre-gyp<ul>
+<li>基于node-gyp</li>
+<li>适合上传到Amazon S3,上传到其他服务需要有些改动</li>
+</ul>
+</li>
+<li>prebuild<ul>
+<li>node-gyp和CMake.js都可用</li>
+<li>只支持上传到 GitHub releases</li>
+</ul>
+</li>
+<li>prebuildify<ul>
+<li>基于node-gyp</li>
+<li>直接上传到npm，install时和module一起下载</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a target="_blank" rel="noopener" href="https://cnodejs.org/topic/5957626dacfce9295ba072e0">https://cnodejs.org/topic/5957626dacfce9295ba072e0</a></li>
+<li><a target="_blank" rel="noopener" href="https://nodejs.org/fr/docs/guides/abi-stability/">https://nodejs.org/fr/docs/guides/abi-stability/</a></li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://blog.aiyi.space/2023/06/13/nodejs-addon/" data-id="cm60mwyuc000h58pf1won4coy" data-title="Nodejs addon开发" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/C-C/" rel="tag">C\C++</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nodejs/" rel="tag">nodejs</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%A1%8C%E9%9D%A2%E7%AB%AF/" rel="tag">桌面端</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2023/06/15/windows-preview/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          windows下的Quicklook
+        
+      </div>
+    </a>
+  
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+        <p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/">
+  This website is marked with <a href="https://creativecommons.org/publicdomain/zero/1.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC0 1.0<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1" alt=""><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/zero.svg?ref=chooser-v1" alt=""></a>
+</p>
+      
+      &copy; 2025 Hunter<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

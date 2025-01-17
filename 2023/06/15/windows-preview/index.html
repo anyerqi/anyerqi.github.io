@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>windows下的Quicklook | Hunter&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="架构windows下的quicklook，基于COM实现，分为两个部分：  Preview Handler: 实现真正的预览功能，包括内容如何渲染（内容是只读的），是否响应用户输入（鼠标、键盘等），右键菜单，内容如何销毁等 Preview Host: 宿主程序，提供预览区域，调用Preview Hander实现的接口，可控制预览区域（大小、是否显示等）">
+<meta property="og:type" content="article">
+<meta property="og:title" content="windows下的Quicklook">
+<meta property="og:url" content="https://blog.aiyi.space/2023/06/15/windows-preview/index.html">
+<meta property="og:site_name" content="Hunter&#39;s Blog">
+<meta property="og:description" content="架构windows下的quicklook，基于COM实现，分为两个部分：  Preview Handler: 实现真正的预览功能，包括内容如何渲染（内容是只读的），是否响应用户输入（鼠标、键盘等），右键菜单，内容如何销毁等 Preview Host: 宿主程序，提供预览区域，调用Preview Hander实现的接口，可控制预览区域（大小、是否显示等）">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://blog.aiyi.space/2023/06/15/windows-preview/quicklook_01.png">
+<meta property="article:published_time" content="2023-06-15T15:44:52.000Z">
+<meta property="article:modified_time" content="2025-01-17T07:42:41.921Z">
+<meta property="article:author" content="Hunter">
+<meta property="article:tag" content="windows">
+<meta property="article:tag" content="quicklook">
+<meta property="article:tag" content="桌面端">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog.aiyi.space/2023/06/15/windows-preview/quicklook_01.png">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.1.7/css/fork-awesome.min.css">
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hunter&#39;s Blog</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Tech Insights and Personal Reflections</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          
+            <a class="nav-icon" target="_blank" rel="noopener" href="https://github.com/anyerqi"><span class="fa fa-github"></span></a>
+          
+            <a class="nav-icon" target="_blank" rel="noopener" href="https://twitter.com/lmnghu"><span class="fa fa-twitter"></span></a>
+          
+        
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://blog.aiyi.space"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-windows-preview" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/06/15/windows-preview/" class="article-date">
+  <time class="dt-published" datetime="2023-06-15T15:44:52.000Z" itemprop="datePublished">2023-06-15</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%A1%8C%E9%9D%A2%E7%AB%AF/">桌面端</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      windows下的Quicklook
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h3 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h3><p>windows下的quicklook，基于COM实现，分为两个部分：</p>
+<ol>
+<li>Preview Handler: 实现真正的预览功能，包括内容如何渲染（内容是只读的），是否响应用户输入（鼠标、键盘等），右键菜单，内容如何销毁等</li>
+<li>Preview Host: 宿主程序，提供预览区域，调用Preview Hander实现的接口，可控制预览区域（大小、是否显示等）</li>
+</ol>
+<span id="more"></span>
+
+<p>可以简单理解为server - client模式，Preivew Handler是server, Preivew Host是client</p>
+<h3 id="开发流程"><a href="#开发流程" class="headerlink" title="开发流程"></a>开发流程</h3><ol>
+<li>Preview Host根据文件扩展名，查找注册表(推荐使用IQueryAssociations)，确定Preview Handler</li>
+<li>创建Preview Handler实例， 推荐使用CoCreateInstance</li>
+<li>向Preview Handler 传递要预览的文件(stream, file等方式)</li>
+<li>可选: 设置前景色，背景色，字体等，需要Preview handler实现这些功能</li>
+<li>向Preview Handler 传递可预览区域(window Handle)</li>
+<li>调用DoPreview 显示预览内容</li>
+<li>调用Unload结束预览<br><img src="/2023/06/15/windows-preview/quicklook_01.png" alt="quicklook arch"></li>
+</ol>
+<h3 id="Preview-Handler"><a href="#Preview-Handler" class="headerlink" title="Preview Handler"></a>Preview Handler</h3><p>有两种实现模式:</p>
+<ol>
+<li>In-Process server, 是以DLL的方式实现(DllSurrogate), 需指定代理为Prevhost.exe, 优点: 实现简单，灵活</li>
+<li>local server，是以独立exe程序实现, 官方不建议，但Office是以这种方式实现的</li>
+</ol>
+<p>这两种模式是COM编程中的两种，其他还有Remote Server, in-process handler</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li>COM:<a target="_blank" rel="noopener" href="https://docs.microsoft.com/zh-cn/windows/win32/com/component-object-model--com--portal">https://docs.microsoft.com/zh-cn/windows/win32/com/component-object-model--com--portal</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/win32/shell/preview-handlers">https://docs.microsoft.com/en-us/windows/win32/shell/preview-handlers</a></li>
+<li><a target="_blank" rel="noopener" href="https://geelaw.blog/entries/ipreviewhandlerframe-wpf-2-interop/">https://geelaw.blog/entries/ipreviewhandlerframe-wpf-2-interop/</a></li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://blog.aiyi.space/2023/06/15/windows-preview/" data-id="cm60mwyu6000058pf6ltsbpwe" data-title="windows下的Quicklook" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/quicklook/" rel="tag">quicklook</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/windows/" rel="tag">windows</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%A1%8C%E9%9D%A2%E7%AB%AF/" rel="tag">桌面端</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2023/07/25/Mac-Quicklook%E5%BC%80%E5%8F%91/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Mac Quicklook开发
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2023/06/13/nodejs-addon/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Nodejs addon开发</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+        <p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/">
+  This website is marked with <a href="https://creativecommons.org/publicdomain/zero/1.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC0 1.0<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1" alt=""><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/zero.svg?ref=chooser-v1" alt=""></a>
+</p>
+      
+      &copy; 2025 Hunter<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

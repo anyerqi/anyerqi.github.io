@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Mac Quicklook开发 | Hunter&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="介绍经常使用Mac电脑的同学应该熟悉 quicklook,在 Finder中，选中一个文件，点击空格键就会弹出一个窗口，显示文件内容（在文件可以预览的情况下），如下图所示：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mac Quicklook开发">
+<meta property="og:url" content="https://blog.aiyi.space/2023/07/25/Mac-Quicklook%E5%BC%80%E5%8F%91/index.html">
+<meta property="og:site_name" content="Hunter&#39;s Blog">
+<meta property="og:description" content="介绍经常使用Mac电脑的同学应该熟悉 quicklook,在 Finder中，选中一个文件，点击空格键就会弹出一个窗口，显示文件内容（在文件可以预览的情况下），如下图所示：">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://blog.aiyi.space/2023/07/25/Mac-Quicklook%E5%BC%80%E5%8F%91/finder-quicklook.png">
+<meta property="og:image" content="https://blog.aiyi.space/2023/07/25/Mac-Quicklook%E5%BC%80%E5%8F%91/quicklook-demo.png">
+<meta property="article:published_time" content="2023-07-25T01:59:38.000Z">
+<meta property="article:modified_time" content="2025-01-17T07:42:36.453Z">
+<meta property="article:author" content="Hunter">
+<meta property="article:tag" content="quicklook">
+<meta property="article:tag" content="桌面端">
+<meta property="article:tag" content="mac">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://blog.aiyi.space/2023/07/25/Mac-Quicklook%E5%BC%80%E5%8F%91/finder-quicklook.png">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.1.7/css/fork-awesome.min.css">
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hunter&#39;s Blog</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Tech Insights and Personal Reflections</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          
+            <a class="nav-icon" target="_blank" rel="noopener" href="https://github.com/anyerqi"><span class="fa fa-github"></span></a>
+          
+            <a class="nav-icon" target="_blank" rel="noopener" href="https://twitter.com/lmnghu"><span class="fa fa-twitter"></span></a>
+          
+        
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://blog.aiyi.space"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-Mac-Quicklook开发" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/07/25/Mac-Quicklook%E5%BC%80%E5%8F%91/" class="article-date">
+  <time class="dt-published" datetime="2023-07-25T01:59:38.000Z" itemprop="datePublished">2023-07-25</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%A1%8C%E9%9D%A2%E7%AB%AF/">桌面端</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Mac Quicklook开发
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>经常使用Mac电脑的同学应该熟悉 quicklook,在 Finder中，选中一个文件，点击空格键就会弹出一个窗口，显示文件内容（在文件可以预览的情况下），如下图所示： </p>
+<span id="more"></span>
+<p><img src="/2023/07/25/Mac-Quicklook%E5%BC%80%E5%8F%91/finder-quicklook.png" alt=" Mac Finder Quicklook window"></p>
+<p>这个是Mac 提供的系统功能，自带支持office相关格式的文件，纯文本文件等格式，具体文件格式如下：</p>
+<ul>
+<li>iWork and Microsoft Office documents</li>
+<li>Images</li>
+<li>Live Photos</li>
+<li>Text files</li>
+<li>PDFs</li>
+<li>Audio and video files</li>
+<li>Augmented reality objects that use the USDZ file format (iOS and iPadOS only)</li>
+</ul>
+<p>如果是想预览系统不支持的文件格式，有什么办法么？Mac也给开发者提供了Framework用于开发特定格式文件的预览视图。有很多开发者提供了免费的 quicklook插件，可以在这个网站上查找自己需要的：<a target="_blank" rel="noopener" href="https://www.quicklookplugins.com/">https://www.quicklookplugins.com/</a></p>
+<h3 id="quicklook-Framework"><a href="#quicklook-Framework" class="headerlink" title="quicklook Framework"></a>quicklook Framework</h3><p>分为两个部分，一个是提供方：支持特定格式文件的预览，另一个是使用方：调用 quicklook预览文件。<br>在 IOS App的开发中，我们一般是使用方，如在 app内显示、预览文件，背后的技术就是quicklook;<br>在 Mac App的开发中，我们还可以是提供方，如自己开发的app提供了一种独有的文档格式，也想让用户在不打开app时，方便预览，就可以开发quicklook plugin以支持自有文档格式的预览;<br>本文主要聚焦于在开发Mac App时，如何在app内预览文件。</p>
+<h3 id="简单接入"><a href="#简单接入" class="headerlink" title="简单接入"></a>简单接入</h3><p>根据官方文档可知，每个应用程序都有一个共享的单实例QLPreviewPanel，可用于显示预览内容<br>如果需求简单，只是显示一个预览窗口，可直接调用接口，传入要预览的文件路径，会自动显示预览窗口</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// QLItem 是 QLPreviewItem的实现</span></span><br><span class="line"><span class="keyword">let</span> qlItem <span class="operator">=</span> <span class="type">QLItem</span>(previewItemURL: .<span class="keyword">init</span>(<span class="type">URL</span>(fileURLWithPath: <span class="string">&quot; pathoffile.png&quot;</span>)))</span><br><span class="line"><span class="comment">// QLData 是QLPreviewPanelDataSource的实现，最佳实践是使用delegate，这里仅是demo</span></span><br><span class="line"><span class="keyword">let</span> qlData: <span class="type">QLData</span> <span class="operator">=</span> .<span class="keyword">init</span>(item: qlItem)</span><br><span class="line"><span class="type">QLPreviewPanel</span>.shared().dataSource <span class="operator">=</span> qlData;</span><br><span class="line"><span class="comment">// 显示到前台</span></span><br><span class="line"><span class="type">QLPreviewPanel</span>.shared().makeKeyAndOrderFront(<span class="literal">nil</span>)</span><br></pre></td></tr></table></figure>
+
+<p>效果如下图<br><img src="/2023/07/25/Mac-Quicklook%E5%BC%80%E5%8F%91/quicklook-demo.png" alt="mac quicklook demo"></p>
+<h3 id="定制化"><a href="#定制化" class="headerlink" title="定制化"></a>定制化</h3><p>上面我们成功显示了预览窗口与文件内容，可能满足简单的需求，如果要更进一步，需要解决两个问题：  </p>
+<ol>
+<li>窗口定制：如上图所示，预览窗口是固定的样式，如果想定制化窗口，就不能使用默认的窗口，需要把内容渲染到自定义的窗口上</li>
+<li>兼容处理：如果是不能预览的文件，默认的提示也不明显，这时我们需要提前知道哪些文件格式能预览，对不能预览的文件提供特别处理</li>
+</ol>
+<p>我们先来解决问题2，我们先来确定预览模块是如何确定哪些文件能否预览，需要调用哪个预览程序来渲染内容。经简单测试：  </p>
+<ol>
+<li>无后缀名的文件无法预览</li>
+<li>修改后缀名后文件无法预览</li>
+</ol>
+<p>可知，预览系统是通过文件后缀名来确定文件是否能预览，和需要调用的预览程序的。通过官方文档可知：</p>
+<ol>
+<li>通过<code>/usr/bin/qlmanage -m plugins</code>可列出支持预览的文件格式与对应的预览程序</li>
+<li>特殊情况下，如果上述命令执行失败，我们还可以通过手动查找的方式确定，预览程序默认存放位置有三处:<ul>
+<li>&#x2F;System&#x2F;Library&#x2F;QuickLook&#x2F;</li>
+<li>&#x2F;Library&#x2F;QuickLook&#x2F;</li>
+<li>～&#x2F;Library&#x2F;QuickLook&#x2F;</li>
+</ul>
+</li>
+</ol>
+<p>遍历上述目录，然后通过每个plugin中的<code>/Contents/Info.plist</code>文件内容来确定哪些文件格式可被预览</p>
+<figure class="highlight plist"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">// 以 /System/Library/QuickLook/Icon.qlgenerator/Contents/Info.plist 文件为例</span><br><span class="line"><span class="tag">&lt;<span class="name">key</span>&gt;</span>CFBundleDocumentTypes<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">array</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">dict</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">key</span>&gt;</span>CFBundleTypeRole<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">string</span>&gt;</span>QLGenerator<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">key</span>&gt;</span>LSItemContentTypes<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">array</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">string</span>&gt;</span>com.apple.iconset<span class="tag">&lt;/<span class="name">string</span>&gt;</span> // 代表此plugin可预览的文件格式</span><br><span class="line"> <span class="tag">&lt;/<span class="name">array</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;/<span class="name">dict</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">array</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>通过上述两种方式可收集到所有可预览的文件格式。下面来解决问题1窗口定制，通过查找官方文档，发现<code>QLPreviewView</code>在自定义的窗口中放置<code>QLPreviewView</code>，然后设置<code>previewItem</code>为文件本地路径即可。</p>
+<h3 id="one-more-thing"><a href="#one-more-thing" class="headerlink" title="one more thing"></a>one more thing</h3><p>这样实现后与Finder中的quicklook对比，发现有些文件格式没在可预览列表中，但可正常预览，还有一个隐藏知识点：文件格式是有继承关系的，如果格式无法预览，默认的quicklook会向上查找父级的格式是否可预览，如果可预览会调用父级的预览程序来提供预览。</p>
+<figure class="highlight swift"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">func</span> <span class="title function_">canQuickLook</span>(<span class="params">filePath</span>: <span class="type">String</span>) -&gt; <span class="type">Bool</span> &#123;</span><br><span class="line">  <span class="comment">// 获取文件扩展名</span></span><br><span class="line">  <span class="keyword">let</span> fileExt <span class="operator">=</span> (filePath <span class="keyword">as</span> <span class="type">NSString</span>).pathExtension</span><br><span class="line">  <span class="comment">// 通过扩展名获取对应的文档格式</span></span><br><span class="line">  <span class="keyword">var</span> type <span class="operator">=</span> <span class="type">UTTypeCreatePreferredIdentifierForTag</span>(kUTTagClassFilenameExtension, fileExt <span class="keyword">as</span> <span class="type">CFString</span>, <span class="literal">nil</span>)<span class="operator">?</span>.takeRetainedValue()</span><br><span class="line">  <span class="built_in">print</span>(type)</span><br><span class="line">  <span class="keyword">if</span> (type <span class="operator">!=</span> <span class="literal">nil</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> uti <span class="operator">=</span> type<span class="operator">!</span> <span class="keyword">as</span> <span class="type">NSString</span></span><br><span class="line">    <span class="keyword">var</span> app_url <span class="operator">=</span> <span class="type">UTI_APP_DICT</span>[uti <span class="keyword">as</span> <span class="type">String</span>]</span><br><span class="line">    <span class="keyword">if</span> (app_url <span class="operator">!=</span> <span class="literal">nil</span>) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 获取父级及以上的文档格式</span></span><br><span class="line">    <span class="keyword">let</span> dict <span class="operator">=</span> <span class="type">UTTypeCopyDeclaration</span>(type<span class="operator">!</span>)</span><br><span class="line">    <span class="built_in">print</span>(dict)</span><br><span class="line">    <span class="keyword">if</span> (dict <span class="operator">!=</span> <span class="literal">nil</span>) &#123;</span><br><span class="line">      <span class="keyword">let</span> map <span class="operator">=</span> dict<span class="operator">?</span>.takeRetainedValue() <span class="keyword">as!</span> [<span class="type">CFString</span>: <span class="type">AnyObject</span>]</span><br><span class="line">      <span class="keyword">let</span> tree <span class="operator">=</span> map[<span class="string">&quot;UTTypeConformsTo&quot;</span> <span class="keyword">as</span> <span class="type">CFString</span>] <span class="keyword">as?</span> [<span class="type">CFString</span>]</span><br><span class="line">      <span class="keyword">if</span> (tree <span class="operator">!=</span> <span class="literal">nil</span>) &#123;</span><br><span class="line">        <span class="keyword">for</span> item <span class="keyword">in</span> tree<span class="operator">!</span> &#123;</span><br><span class="line">          uti <span class="operator">=</span> item <span class="keyword">as</span> <span class="type">NSString</span></span><br><span class="line">          <span class="comment">// 只要有一个父级格式在可预览字典中即可预览</span></span><br><span class="line">          app_url <span class="operator">=</span> <span class="type">UTI_APP_DICT</span>[uti <span class="keyword">as</span> <span class="type">String</span>]</span><br><span class="line">          <span class="keyword">if</span> (app_url <span class="operator">!=</span> <span class="literal">nil</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://blog.aiyi.space/2023/07/25/Mac-Quicklook%E5%BC%80%E5%8F%91/" data-id="cm60mwyub000g58pffqvu084o" data-title="Mac Quicklook开发" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mac/" rel="tag">mac</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/quicklook/" rel="tag">quicklook</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%A1%8C%E9%9D%A2%E7%AB%AF/" rel="tag">桌面端</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2025/01/17/Android-%E6%8A%93%E5%8C%85/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Android 抓包
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2023/06/15/windows-preview/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">windows下的Quicklook</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+        <p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/">
+  This website is marked with <a href="https://creativecommons.org/publicdomain/zero/1.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC0 1.0<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1" alt=""><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/zero.svg?ref=chooser-v1" alt=""></a>
+</p>
+      
+      &copy; 2025 Hunter<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

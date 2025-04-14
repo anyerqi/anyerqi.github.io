@@ -1,0 +1,151 @@
+/* Dark Mode Styles */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark-mode {
+  background-color: #121212;
+  color: #e0e0e0;
+  text-shadow: none;
+}
+
+
+
+/* Dark mode banner styling */
+body.dark-mode #banner {
+  transition: background-image 0.3s ease;
+}
+
+/* This class will be added by JavaScript when the dark banner is loaded */
+body.dark-mode #banner.dark-banner-loaded {
+  background-image: var(--dark-banner-url);
+}
+
+body.dark-mode #header-inner {
+  color: #e0e0e0;
+}
+
+body.dark-mode .article-title,
+body.dark-mode .article-title a {
+  color: #e0e0e0;
+  transition: color 0.3s ease;
+}
+
+body.dark-mode .article-entry {
+  color: #d0d0d0;
+  transition: color 0.3s ease;
+}
+
+body.dark-mode #sidebar {
+  background-color: #1e1e1e;
+  color: #d0d0d0;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark-mode .widget-title {
+  color: #e0e0e0;
+  transition: color 0.3s ease;
+}
+
+body.dark-mode .article {
+  /*background-color: #1e1e1e;*/
+  transition: background-color 0.3s ease;
+}
+
+body.dark-mode #footer {
+  background-color: #1a1a1a;
+  color: #bbb;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark-mode a {
+  color: #61afef;
+  transition: color 0.3s ease;
+  text-shadow: none;
+}
+
+body.dark-mode a:hover {
+  color: #7bc5ff;
+}
+
+body.dark-mode .widget a {
+  color: #61afef;
+}
+
+body.dark-mode #nav {
+  border-color: #333;
+  transition: border-color 0.3s ease;
+}
+
+body.dark-mode #nav-footer a {
+  color: #e0e0e0;
+}
+
+body.dark-mode hr {
+  border-top-color: #333;
+  transition: border-color 0.3s ease;
+}
+
+body.dark-mode #main-nav a {
+  color: #e0e0e0;
+  transition: color 0.3s ease;
+}
+
+body.dark-mode #wrap {
+  background-color: #121212;
+  transition: background-color 0.3s ease;
+}
+
+body.dark-mode .article-inner {
+  background-color: #1e1e1e;
+  transition: background-color 0.3s ease;
+}
+
+body.dark-mode .article-inner, .archive-article-inner {
+  box-shadow: none;
+  background-color: #1e1e1e;
+}
+
+body.dark-mode .article-meta {
+  color: #999;
+  transition: color 0.3s ease;
+}
+
+body.dark-mode .article-category a {
+  color: #61afef;
+}
+
+body.dark-mode code {
+  background-color: #2d2d2d;
+  color: #e0e0e0;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark-mode blockquote {
+  border-left-color: #444;
+  background-color: #222;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+body.dark-mode .article-tag-list-item a {
+  color: #d0d0d0;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark-mode .article-share-links {
+  background-color: #333;
+  transition: background-color 0.3s ease;
+}
+
+body.dark-mode .article-share-twitter,
+body.dark-mode .article-share-facebook,
+body.dark-mode .article-share-pinterest,
+body.dark-mode .article-share-linkedin {
+  color: #ddd;
+  transition: color 0.3s ease;
+}
+
+/* Dark mode toggle button hover effect */
+.dark-mode-toggle:hover {
+  opacity: 0.8;
+}

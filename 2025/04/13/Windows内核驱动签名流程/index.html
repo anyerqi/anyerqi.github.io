@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Windows内核驱动签名流程 | Hunter&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <meta name="dark-banner" content="/images/53988283029_ce86d5f510_k.jpg">
+  
+  <meta name="description" content="与普通应用程序签名不同，Windows内核驱动程序因其在操作系统核心区域运行且拥有更高权限，Microsoft对其签名要求更为严格。本文详细介绍Windows内核驱动的签名流程和相关要求。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Windows内核驱动签名流程">
+<meta property="og:url" content="https://blog.aiyi.space/2025/04/13/Windows%E5%86%85%E6%A0%B8%E9%A9%B1%E5%8A%A8%E7%AD%BE%E5%90%8D%E6%B5%81%E7%A8%8B/index.html">
+<meta property="og:site_name" content="Hunter&#39;s Blog">
+<meta property="og:description" content="与普通应用程序签名不同，Windows内核驱动程序因其在操作系统核心区域运行且拥有更高权限，Microsoft对其签名要求更为严格。本文详细介绍Windows内核驱动的签名流程和相关要求。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-04-13T12:25:43.000Z">
+<meta property="article:modified_time" content="2025-04-14T09:02:26.523Z">
+<meta property="article:author" content="Hunter">
+<meta property="article:tag" content="Windows">
+<meta property="article:tag" content="驱动">
+<meta property="article:tag" content="签名">
+<meta name="twitter:card" content="summary">
+  
+  
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/dark-mode.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/css/fork-awesome.min.css">
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hunter&#39;s Blog</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Tech Insights and Personal Reflections</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          
+            <a class="nav-icon" target="_blank" rel="noopener" href="https://github.com/anyerqi"><span class="fa fa-github"></span></a>
+          
+            <a class="nav-icon" target="_blank" rel="noopener" href="https://twitter.com/lmnghu"><span class="fa fa-twitter"></span></a>
+          
+        
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://blog.aiyi.space"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-Windows内核驱动签名流程" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2025/04/13/Windows%E5%86%85%E6%A0%B8%E9%A9%B1%E5%8A%A8%E7%AD%BE%E5%90%8D%E6%B5%81%E7%A8%8B/" class="article-date">
+  <time class="dt-published" datetime="2025-04-13T12:25:43.000Z" itemprop="datePublished">2025-04-13</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%A1%8C%E9%9D%A2%E7%AB%AF/">桌面端</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Windows内核驱动签名流程
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>与普通应用程序签名不同，Windows内核驱动程序因其在操作系统核心区域运行且拥有更高权限，Microsoft对其签名要求更为严格。本文详细介绍Windows内核驱动的签名流程和相关要求。</p>
+<span id="more"></span>
+
+<h2 id="前置条件"><a href="#前置条件" class="headerlink" title="前置条件"></a>前置条件</h2><p>完成内核驱动签名需要具备以下必备条件：</p>
+<ol>
+<li><p><strong>EV (Extended Validation) 代码签名证书</strong></p>
+<ul>
+<li>必须存储在硬件安全模块(HSM)或USB密钥中</li>
+<li>证书有效期一般为1-3年，请确保证书在有效期内</li>
+<li>证书PIN码有有效期限制，请注意按时更新</li>
+<li>连续输错PIN码达到限制次数(通常为5次)后，证书将被锁定，需使用管理PIN码解锁</li>
+<li>必须由Microsoft认可的证书颁发机构(CA)颁发</li>
+</ul>
+</li>
+<li><p><strong>签名工具</strong>（以下二选一）：</p>
+<ul>
+<li>EV证书服务商提供的签名工具，如WoSign官方的”WoSignCode代码签名精灵”（本文以此为例）</li>
+<li>Microsoft官方签名工具：SignTool（包含在Windows SDK中）</li>
+</ul>
+</li>
+<li><p><strong>Windows开发环境</strong></p>
+<ul>
+<li>Windows 10或更高版本操作系统</li>
+<li>Visual Studio 2019或更高版本（包含驱动开发包）</li>
+<li>Windows Driver Kit (WDK)，需与Visual Studio版本匹配</li>
+<li>推荐安装Windows SDK</li>
+</ul>
+</li>
+<li><p><strong>内核驱动源代码</strong></p>
+</li>
+<li><p><strong>Microsoft硬件开发中心账号</strong></p>
+<ul>
+<li>需在<a target="_blank" rel="noopener" href="https://partner.microsoft.com/dashboard/hardware">Microsoft合作伙伴中心</a>注册账号</li>
+<li>用于提交驱动进行WHQL认证或attestation签名</li>
+</ul>
+</li>
+</ol>
+<h2 id="签名流程"><a href="#签名流程" class="headerlink" title="签名流程"></a>签名流程</h2><h3 id="1-EV证书验证"><a href="#1-EV证书验证" class="headerlink" title="1. EV证书验证"></a>1. EV证书验证</h3><ul>
+<li>登录Microsoft硬件开发中心，创建新的驱动程序提交</li>
+<li>从平台下载需要签名的<code>Signable.cab</code>文件（包含验证文件）</li>
+<li>使用签名工具（如WoSignCode代码签名精灵）对验证文件进行签名：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 如使用SignTool示例</span><br><span class="line">SignTool sign /v /ac &quot;CrossCertificateFile.cer&quot; /n &quot;Your Subject Name&quot; /t http://timestamp.digicert.com /fd sha256 Signable.cab</span><br></pre></td></tr></table></figure></li>
+<li>上传签名后的文件回Microsoft硬件开发中心，验证EV证书有效性</li>
+<li>验证通过后，才能继续后续步骤</li>
+</ul>
+<h3 id="2-编译内核驱动"><a href="#2-编译内核驱动" class="headerlink" title="2. 编译内核驱动"></a>2. 编译内核驱动</h3><ul>
+<li>在Visual Studio中配置项目属性，确保驱动目标平台正确</li>
+<li>选择目标架构(x64、x86、ARM64等)</li>
+<li>选择适当的驱动模型（KMDF、UMDF或WDM）</li>
+<li>设置正确的驱动目标最低操作系统版本</li>
+<li>编译后将生成如下文件：<ul>
+<li><code>.inf</code>: 驱动安装信息文件</li>
+<li><code>.sys</code>: 驱动程序二进制文件</li>
+<li><code>.cat</code>: 安全目录文件（包含签名）</li>
+<li><code>.pdb</code>: 程序调试数据库文件</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-驱动打包与签名"><a href="#3-驱动打包与签名" class="headerlink" title="3. 驱动打包与签名"></a>3. 驱动打包与签名</h3><ul>
+<li><p><strong>准备驱动包</strong></p>
+<ul>
+<li>编写<code>.ddf</code>文件（定义要包含在CAB文件中的文件及其目标位置）</li>
+<li>示例<code>.ddf</code>内容：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">.OPTION EXPLICIT     ; Generate errors</span><br><span class="line">.Set CabinetNameTemplate=Driver.cab</span><br><span class="line">.Set DiskDirectoryTemplate=CDROM ; All cabinets go in a single directory</span><br><span class="line">.Set CompressionType=MSZIP       ; Type of compression</span><br><span class="line">.Set Cabinet=on                  ; Put files in cabinet</span><br><span class="line">.Set Compress=on                 ; Compress files</span><br><span class="line"></span><br><span class="line">; 包含所有需要的驱动文件</span><br><span class="line">driver.inf</span><br><span class="line">driver.sys</span><br><span class="line">driver.cat</span><br><span class="line">driver.pdb</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p><strong>生成CAB文件</strong></p>
+<ul>
+<li>使用<code>MakeCab</code>命令根据<code>.ddf</code>文件生成CAB包：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">makecab /f driverfiles.ddf</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p><strong>对CAB包进行签名</strong></p>
+<ul>
+<li>使用EV证书对CAB文件进行签名</li>
+<li>如使用WoSignCode工具，按UI指引操作</li>
+<li>如使用SignTool:<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SignTool sign /v /ac &quot;CrossCertificateFile.cer&quot; /n &quot;Your Subject Name&quot; /t http://timestamp.digicert.com /fd sha256 Driver.cab</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+</ul>
+<h3 id="4-提交至Microsoft进行认证"><a href="#4-提交至Microsoft进行认证" class="headerlink" title="4. 提交至Microsoft进行认证"></a>4. 提交至Microsoft进行认证</h3><ul>
+<li>登录Microsoft硬件开发中心</li>
+<li>创建新的提交，上传已签名的CAB文件</li>
+<li>选择适当的认证类型：<ul>
+<li>WHQL认证：完整测试，获得”Windows认证”徽标</li>
+<li>Attestation签名：简化流程，仅提供兼容性签名</li>
+</ul>
+</li>
+<li>填写驱动详细信息，包括支持的操作系统版本、体系结构等</li>
+<li>提交后等待Microsoft审核</li>
+<li>如果提交被拒绝，根据审核日志修改问题并重新提交</li>
+</ul>
+<h3 id="5-获取签名后的驱动程序"><a href="#5-获取签名后的驱动程序" class="headerlink" title="5. 获取签名后的驱动程序"></a>5. 获取签名后的驱动程序</h3><ul>
+<li>审核通过后，从Microsoft硬件开发中心下载已签名的驱动包</li>
+<li>签名后的驱动将包含Microsoft的交叉证书，可在所有支持的Windows版本上正常安装运行</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://blog.aiyi.space/2025/04/13/Windows%E5%86%85%E6%A0%B8%E9%A9%B1%E5%8A%A8%E7%AD%BE%E5%90%8D%E6%B5%81%E7%A8%8B/" data-id="cm9gv69c00008lypf58ww9p61" data-title="Windows内核驱动签名流程" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Windows/" rel="tag">Windows</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%AD%BE%E5%90%8D/" rel="tag">签名</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%A9%B1%E5%8A%A8/" rel="tag">驱动</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2025/02/05/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8AI%E5%B7%A5%E5%85%B7/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">如何使用 AI 工具</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2025 Hunter<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+<script src="/js/dark-mode.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

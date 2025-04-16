@@ -101,7 +101,7 @@ body.dark-mode .article-inner {
   transition: background-color 0.3s ease;
 }
 
-body.dark-mode .article-inner, .archive-article-inner {
+body.dark-mode .archive-article-inner {
   box-shadow: none;
   background-color: #1e1e1e;
 }

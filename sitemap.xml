@@ -58,7 +58,7 @@
 
   <url>
     <loc>https://blog.aiyi.space/</loc>
-    <lastmod>2025-04-14</lastmod>
+    <lastmod>2025-04-16</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -66,98 +66,98 @@
   
   <url>
     <loc>https://blog.aiyi.space/tags/Android/</loc>
-    <lastmod>2025-04-14</lastmod>
+    <lastmod>2025-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.aiyi.space/tags/%E9%80%86%E5%90%91/</loc>
-    <lastmod>2025-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://blog.aiyi.space/tags/Windows/</loc>
-    <lastmod>2025-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://blog.aiyi.space/tags/%E9%A9%B1%E5%8A%A8/</loc>
-    <lastmod>2025-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://blog.aiyi.space/tags/%E7%AD%BE%E5%90%8D/</loc>
-    <lastmod>2025-04-14</lastmod>
+    <lastmod>2025-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.aiyi.space/tags/mac/</loc>
-    <lastmod>2025-04-14</lastmod>
+    <lastmod>2025-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.aiyi.space/tags/quicklook/</loc>
-    <lastmod>2025-04-14</lastmod>
+    <lastmod>2025-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.aiyi.space/tags/%E6%A1%8C%E9%9D%A2%E7%AB%AF/</loc>
-    <lastmod>2025-04-14</lastmod>
+    <lastmod>2025-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.aiyi.space/tags/nodejs/</loc>
-    <lastmod>2025-04-14</lastmod>
+    <lastmod>2025-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.aiyi.space/tags/C-C/</loc>
-    <lastmod>2025-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://blog.aiyi.space/tags/AI/</loc>
-    <lastmod>2025-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://blog.aiyi.space/tags/Assistant/</loc>
-    <lastmod>2025-04-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://blog.aiyi.space/tags/%E5%B7%A5%E5%85%B7/</loc>
-    <lastmod>2025-04-14</lastmod>
+    <lastmod>2025-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>https://blog.aiyi.space/tags/windows/</loc>
-    <lastmod>2025-04-14</lastmod>
+    <lastmod>2025-04-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://blog.aiyi.space/tags/AI/</loc>
+    <lastmod>2025-04-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://blog.aiyi.space/tags/Assistant/</loc>
+    <lastmod>2025-04-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://blog.aiyi.space/tags/%E5%B7%A5%E5%85%B7/</loc>
+    <lastmod>2025-04-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://blog.aiyi.space/tags/Windows/</loc>
+    <lastmod>2025-04-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://blog.aiyi.space/tags/%E9%A9%B1%E5%8A%A8/</loc>
+    <lastmod>2025-04-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://blog.aiyi.space/tags/%E7%AD%BE%E5%90%8D/</loc>
+    <lastmod>2025-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
@@ -166,7 +166,7 @@
   
   <url>
     <loc>https://blog.aiyi.space/categories/%E6%A1%8C%E9%9D%A2%E7%AB%AF/</loc>
-    <lastmod>2025-04-14</lastmod>
+    <lastmod>2025-04-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>

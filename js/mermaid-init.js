@@ -9,7 +9,6 @@
     '.article-entry pre.mermaid-diagram{background:#fff!important;border:0;box-shadow:none;overflow-x:auto;-webkit-overflow-scrolling:touch;text-align:left;padding:1em;border-radius:4px}',
     '.article-entry pre.mermaid-diagram code.mermaid{display:block;background:transparent!important;padding:0;white-space:normal}',
     '.article-entry pre.mermaid-diagram svg{display:block;height:auto;width:auto!important;max-width:none!important;min-width:900px;margin:0 auto}',
-    'body.dark-mode .article-entry pre.mermaid-diagram{background:#202124!important}'
   ].join('\n');
   document.head.appendChild(style);
 

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>微信浏览器快捷登录：按流程拆解 | Hunter&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+  <meta name="dark-banner" content="/images/53988283029_ce86d5f510_k.jpg">
+  
+  <meta name="description" content="实测环境：Windows 微信 4.2.1.8、macOS 微信 4.1.15、Edge &#x2F; Chrome。文中数据来自本机抓包、内存转储与 API Hook。  微信网页登录有两种形态：扫码，和「本机已登录，直接授权」。后者不经过二维码，靠的是一个只监听 127.0.0.1 的 HTTPS 服务。本文按流程图的顺序，一步一步拆这条链路。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="微信浏览器快捷登录：按流程拆解">
+<meta property="og:url" content="https://blog.aiyi.space/2026/11/20/wechat-browser-login/index.html">
+<meta property="og:site_name" content="Hunter&#39;s Blog">
+<meta property="og:description" content="实测环境：Windows 微信 4.2.1.8、macOS 微信 4.1.15、Edge &#x2F; Chrome。文中数据来自本机抓包、内存转储与 API Hook。  微信网页登录有两种形态：扫码，和「本机已登录，直接授权」。后者不经过二维码，靠的是一个只监听 127.0.0.1 的 HTTPS 服务。本文按流程图的顺序，一步一步拆这条链路。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2026-11-19T16:00:00.000Z">
+<meta property="article:modified_time" content="2026-11-21T03:22:52.942Z">
+<meta property="article:author" content="Hunter">
+<meta property="article:tag" content="微信">
+<meta property="article:tag" content="浏览器">
+<meta property="article:tag" content="登录">
+<meta property="article:tag" content="逆向分析">
+<meta name="twitter:card" content="summary">
+  
+  
+    <link rel="shortcut icon" href="/images/favicon.ico">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+<link rel="stylesheet" href="/css/dark-mode.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+    
+<link rel="stylesheet" href="/css/fork-awesome.min.css">
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hunter&#39;s Blog</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Tech Insights and Personal Reflections</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          
+            <a class="nav-icon" target="_blank" rel="noopener" href="https://github.com/anyerqi"><span class="fa fa-github"></span></a>
+          
+            <a class="nav-icon" target="_blank" rel="noopener" href="https://twitter.com/lmnghu"><span class="fa fa-twitter"></span></a>
+          
+        
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://blog.aiyi.space"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-wechat-browser-login" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2026/11/20/wechat-browser-login/" class="article-date">
+  <time class="dt-published" datetime="2026-11-19T16:00:00.000Z" itemprop="datePublished">2026-11-20</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      微信浏览器快捷登录：按流程拆解
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>实测环境：Windows 微信 4.2.1.8、macOS 微信 4.1.15、Edge &#x2F; Chrome。文中数据来自本机抓包、内存转储与 API Hook。</p>
+</blockquote>
+<p>微信网页登录有两种形态：扫码，和「本机已登录，直接授权」。后者不经过二维码，靠的是一个只监听 <code>127.0.0.1</code> 的 HTTPS 服务。本文按流程图的顺序，一步一步拆这条链路。</p>
+<span id="more"></span>
+
+<h2 id="全流程"><a href="#全流程" class="headerlink" title="全流程"></a>全流程</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">  participant U as 用户</span><br><span class="line">  participant P as 网站页面</span><br><span class="line">  participant L as 本机微信</span><br><span class="line">  participant W as 微信服务端</span><br><span class="line">  participant B as 网站后端</span><br><span class="line"></span><br><span class="line">  Note over L: 第 0 步（前提）桌面客户端已登录</span><br><span class="line">  U-&gt;&gt;P: 第 1 步 点击「微信登录」</span><br><span class="line">  P-&gt;&gt;P: 第 1 步 创建 iframe</span><br><span class="line">  P-&gt;&gt;L: 第 2 步 探测 14013 / 14014 / 14015</span><br><span class="line">  P-&gt;&gt;L: 第 3 步 TLS 握手</span><br><span class="line">  P-&gt;&gt;L: 第 4 步 POST /api/check-login</span><br><span class="line">  L--&gt;&gt;P: 第 5 步 昵称、头像、authorize_uuid</span><br><span class="line">  U-&gt;&gt;P: 第 6 步 点击「快速登录」</span><br><span class="line">  P-&gt;&gt;L: 第 7 步 POST /api/authorize</span><br><span class="line">  L-&gt;&gt;W: 第 8 步 MMTLS 转发授权</span><br><span class="line">  W--&gt;&gt;L: 第 8 步 授权结果</span><br><span class="line">  L--&gt;&gt;P: 第 9 步 redirect_url（含 code）</span><br><span class="line">  P-&gt;&gt;B: 第 10 步 跳转 redirect_uri</span><br><span class="line">  B-&gt;&gt;W: 第 11 步 用 code 换 access_token</span><br><span class="line">  W--&gt;&gt;B: 第 11 步 返回 openid</span><br></pre></td></tr></table></figure>
+
+<p>下面逐步说明每一步在做什么、为什么必须这么做。</p>
+<h2 id="第-0-步（前提）：桌面客户端处于登录态"><a href="#第-0-步（前提）：桌面客户端处于登录态" class="headerlink" title="第 0 步（前提）：桌面客户端处于登录态"></a>第 0 步（前提）：桌面客户端处于登录态</h2><p>这一步不在图里，但它是整条链路的前提。</p>
+<p><strong>只有桌面微信登录完成后，本机端口才开始监听。</strong> 客户端停在登录窗口（窗口类名 <code>mmui::LoginWindow</code>）时，14013 等端口全部不监听；期间打开 <code>wx.qq.com</code>、调用 <code>weixin://</code> 协议、重启客户端、打开第三方登录页，都触发不了。</p>
+<p>手机确认登录后，五个端口同时进入 LISTENING：14013、14016、14019、14022、14023。</p>
+<p>浏览器里的网页登录只消费这些端口，不会唤起它们。换一台没有登录桌面微信的电脑，快捷登录一定不可用，页面只能退回扫码。</p>
+<h2 id="第-1-步：页面点击「微信登录」"><a href="#第-1-步：页面点击「微信登录」" class="headerlink" title="第 1 步：页面点击「微信登录」"></a>第 1 步：页面点击「微信登录」</h2><p>网站不自己实现协议，而是引入微信开放平台提供的网页登录 JS 库——<code>wxLogin.js</code>（<code>https://res.wx.qq.com/connect/zh_CN/htmledition/js/wxLogin.js</code>），在页面上用 <code>new WxLogin(&#123; appid, scope, redirect_uri, state &#125;)</code> 初始化。</p>
+<p>这个库只做两件事：拼出授权地址，把授权页嵌进来。它创建的是一个 iframe，指向：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://open.weixin.qq.com/connect/qrconnect?appid=...&amp;scope=...&amp;redirect_uri=...&amp;state=...&amp;fast_login=1</span><br></pre></td></tr></table></figure>
+
+<p>iframe 上带一个关键属性：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">allow=&quot;local-network-access&quot;</span><br></pre></td></tr></table></figure>
+
+<p>这是新版 Chrome 对「公网页面访问本地网络」的权限要求。没有它，iframe 里的页面连不上 localhost。</p>
+<p>页面与 iframe 之间用 <code>postMessage</code> 通信：iframe 通过 <code>status</code> 消息回传 <code>wxReady</code>、<code>wxQRcodeReady</code> 等状态，网站据此决定何时显示登录按钮。</p>
+<p>用 iframe 而不是让网站自己发请求，是为了把登录协议收在微信自己的源里：网站只拿到最后的结果，不接触中间的 <code>authorize_uuid</code> 和本地接口。</p>
+<h2 id="第-2-步：探测本机端口"><a href="#第-2-步：探测本机端口" class="headerlink" title="第 2 步：探测本机端口"></a>第 2 步：探测本机端口</h2><p>iframe 里的页面按固定顺序探测 <code>14013 → 14014 → 14015</code>，逐个尝试 <code>https://localhost.weixin.qq.com:&lt;port&gt;</code>。</p>
+<ul>
+<li>命中条件不是「端口能连上」，而是「能完成 TLS 并且认登录接口」。</li>
+<li>多个端口是为了回退：端口被占用、或机器上装了多个微信版本时，仍有可用入口。</li>
+<li>实测登录后本机同时监听多个端口，其中 14016 &#x2F; 14019 &#x2F; 14023 用同一张证书但不接受登录接口，属于同一套本地服务；14022 不是 TLS，握手直接断开。</li>
+</ul>
+<h2 id="第-3-步：TLS-握手，以及为什么需要域名和证书"><a href="#第-3-步：TLS-握手，以及为什么需要域名和证书" class="headerlink" title="第 3 步：TLS 握手，以及为什么需要域名和证书"></a>第 3 步：TLS 握手，以及为什么需要域名和证书</h2><p>这一步是整套方案里最容易被忽略、但设计上最关键的一环。</p>
+<p><strong>为什么必须是 HTTPS。</strong> 不是为了加密，是为了<strong>身份</strong>。<code>127.0.0.1:14013</code> 没有任何访问控制：任何本地程序都能抢在微信前面绑定它，收下页面发来的 <code>appid</code>、<code>redirect_uri</code>、<code>state</code>，再返回一个自己的 <code>redirect_url</code>。页面没有办法分辨对面是谁。TLS 证书是唯一的辨别手段——本地接口没有共享密钥，也不走账号体系。</p>
+<p><strong>浏览器这一侧的要求。</strong> 除了「证明对面是谁」，这段连接还要满足浏览器的几条规则：</p>
+<ul>
+<li><strong>跨源读取</strong>：页面源是 <code>https://open.weixin.qq.com</code>，本地端口是另一个源。响应必须带 <code>Access-Control-Allow-Origin: https://open.weixin.qq.com</code>，否则页面读不到 JSON，只能拿到一个不透明响应。</li>
+<li><strong>本地网络访问权限</strong>：新版 Chrome 把「公网页面访问本地网络」单独设为一项权限，iframe 必须声明 <code>allow=&quot;local-network-access&quot;</code>，否则请求在浏览器侧就被拒绝。</li>
+<li><strong>安全上下文</strong>：回环地址在规范里被视为「潜在可信来源」，所以明文 <code>http://127.0.0.1</code> 在多数浏览器上并不会被当作混合内容拦截。这也是为什么「加密」不是选 HTTPS 的主因——主因仍是身份。但各浏览器对私有网络请求的安全要求在收紧，明文回环属于随时可能变的实现细节，而公共证书的 HTTPS 在所有环境下都成立。</li>
+</ul>
+<p><strong>为什么必须有域名。</strong> 公共 CA 不给 <code>localhost</code>、<code>*.localhost</code> 或 <code>127.0.0.1</code> 这类保留名和保留地址签发证书。腾讯需要一个自己控制、能通过域名验证的名字，于是用了 <code>weixin.qq.com</code> 的子域 <code>localhost.weixin.qq.com</code>，并把它解析到 <code>127.0.0.1</code>。名字足以申请证书，解析结果又把流量锁在本机。</p>
+<p><strong>为什么必须是公共 CA。</strong> 自签证书不在系统信任库，浏览器会拦下并弹警告，快捷登录就无法无人值守完成。用公共 CA 的 OV 证书，浏览器默认信任，页面才能静默完成这次本地调用。</p>
+<p>证书实测数据：</p>
+<table>
+<thead>
+<tr>
+<th>项</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>主体</td>
+<td><code>CN=localhost.weixin.qq.com</code>，O&#x3D;Tencent Technology (Shenzhen) Company Limited</td>
+</tr>
+<tr>
+<td>签发者</td>
+<td>DigiCert Secure Site OV G5 TLS CN RSA4096 SHA384 2022 CA1</td>
+</tr>
+<tr>
+<td>算法</td>
+<td>RSA-2048</td>
+</tr>
+<tr>
+<td>序列号</td>
+<td><code>0AE9E711B11E33C15FB5F9E56DF9B008</code></td>
+</tr>
+<tr>
+<td>有效期</td>
+<td>2026-11-18 至 2027-06-04</td>
+</tr>
+<tr>
+<td>证书透明度</td>
+<td>该域名仅一条签发记录</td>
+</tr>
+</tbody></table>
+<p>只有一张证书，意味着所有客户端出示同一张，私钥必须分发到每一台机器。这违背公共 CA 对私钥保管的基本要求，是这套设计最薄弱的地方——客户端为此付出的代价见文末。</p>
+<h2 id="第-4-步：确认本机账号"><a href="#第-4-步：确认本机账号" class="headerlink" title="第 4 步：确认本机账号"></a>第 4 步：确认本机账号</h2><p>握手成功后，页面发第一个请求：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">POST /api/check-login</span><br><span class="line">&#123;&quot;apiname&quot;:&quot;qrconnectchecklogin&quot;,&quot;jsdata&quot;:&#123;&quot;appid&quot;:&quot;...&quot;,&quot;scope&quot;:&quot;...&quot;,&quot;redirect_uri&quot;:&quot;...&quot;,&quot;state&quot;:&quot;...&quot;&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意：<strong>本地接口不看 URL 路径，看 JSON 里的 <code>apiname</code></strong>。<code>/api/check-login</code> 只是惯例写法，真正分派靠这个字段。</p>
+<h2 id="第-5-步：返回账号信息与授权票据"><a href="#第-5-步：返回账号信息与授权票据" class="headerlink" title="第 5 步：返回账号信息与授权票据"></a>第 5 步：返回账号信息与授权票据</h2><p>本地服务如果识别到客户端已登录，返回昵称、头像和一个 <code>authorize_uuid</code>：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;errcode&quot;</span><span class="punctuation">:</span><span class="number">0</span><span class="punctuation">,</span><span class="attr">&quot;jsdata&quot;</span><span class="punctuation">:</span><span class="punctuation">&#123;</span><span class="attr">&quot;nickname&quot;</span><span class="punctuation">:</span><span class="string">&quot;...&quot;</span><span class="punctuation">,</span><span class="attr">&quot;headimgurl&quot;</span><span class="punctuation">:</span><span class="string">&quot;...&quot;</span><span class="punctuation">,</span><span class="attr">&quot;authorize_uuid&quot;</span><span class="punctuation">:</span><span class="string">&quot;...&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>authorize_uuid</code> 把「这一次页面授权」和「本机这个账号」绑定起来，后续确认必须带同一个值。如果客户端只支持扫码，这里会返回 <code>errcode=10057</code>，页面退回二维码。</p>
+<h2 id="第-6-步：用户点击「快速登录」"><a href="#第-6-步：用户点击「快速登录」" class="headerlink" title="第 6 步：用户点击「快速登录」"></a>第 6 步：用户点击「快速登录」</h2><p>确认界面在 iframe 里，页面把点击位置的屏幕坐标一并塞进请求（<code>jsdata.data</code> 里的 <code>x</code>、<code>y</code>），用于让客户端把确认窗口弹到正确位置。</p>
+<p>这一步是<strong>用户意图的显式表达</strong>：不点，就不会有下一步。</p>
+<h2 id="第-7-步：提交授权"><a href="#第-7-步：提交授权" class="headerlink" title="第 7 步：提交授权"></a>第 7 步：提交授权</h2><figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">POST /api/authorize</span><br><span class="line">&#123;&quot;apiname&quot;:&quot;qrconnectfastauthorize&quot;,&quot;jsdata&quot;:&#123;&quot;data&quot;:&quot;&#123;\&quot;x\&quot;:360,\&quot;y\&quot;:263&#125;&quot;,&quot;appid&quot;:&quot;...&quot;,&quot;scope&quot;:&quot;...&quot;,&quot;redirect_uri&quot;:&quot;...&quot;,&quot;state&quot;:&quot;...&quot;,&quot;authorize_uuid&quot;:&quot;...&quot;&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="第-8-步：客户端把请求转给微信服务端"><a href="#第-8-步：客户端把请求转给微信服务端" class="headerlink" title="第 8 步：客户端把请求转给微信服务端"></a>第 8 步：客户端把请求转给微信服务端</h2><p>本地服务不自己发授权，它把这次确认经 MMTLS 长连接转发给微信服务端，调用：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/cgi-bin/mmbiz-bin/qrconnect_fast_authorize</span><br><span class="line">/cgi-bin/mmbiz-bin/qrconnect_fast_authorize_confirm</span><br></pre></td></tr></table></figure>
+
+<p>账号是否有效、这次授权是否成立，由服务端判定。本地服务只是通道。</p>
+<h2 id="第-9-步：返回-redirect-url"><a href="#第-9-步：返回-redirect-url" class="headerlink" title="第 9 步：返回 redirect_url"></a>第 9 步：返回 redirect_url</h2><p>服务端通过后，本地服务把结果回给页面，其中 <code>jsdata.redirect_url</code> 的查询参数里带 OAuth <code>code</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://&lt;redirect_uri&gt;?code=...&amp;state=...</span><br></pre></td></tr></table></figure>
+
+<p><code>code</code> 由微信服务端签发。这也是为什么本地服务伪造不了它——它没有签发能力，只有转发能力。</p>
+<h2 id="第-10-步：页面跳转回网站"><a href="#第-10-步：页面跳转回网站" class="headerlink" title="第 10 步：页面跳转回网站"></a>第 10 步：页面跳转回网站</h2><p>页面按 <code>redirect_uri</code> 跳转，把 <code>code</code> 和原样带回的 <code>state</code> 交给网站。</p>
+<p><code>state</code> 的作用是防 CSRF：网站要校验回来的值和当初发出去的一致。</p>
+<h2 id="第-11-步：网站后端兑换凭证"><a href="#第-11-步：网站后端兑换凭证" class="headerlink" title="第 11 步：网站后端兑换凭证"></a>第 11 步：网站后端兑换凭证</h2><p>最后一步与浏览器无关。网站后端拿 <code>code</code> 调 <code>api.weixin.qq.com</code>，换取 <code>access_token</code> 和 <code>openid</code>。</p>
+<p><code>access_token</code> 不下发到前端，前端从头到尾只见过 <code>authorize_uuid</code> 和一个一次性的 <code>code</code>。</p>
+<h2 id="证书与私钥在客户端里的形态"><a href="#证书与私钥在客户端里的形态" class="headerlink" title="证书与私钥在客户端里的形态"></a>证书与私钥在客户端里的形态</h2><p>前面说「所有客户端共用一张证书」，那私钥是怎么到客户端的？实测结果和直觉不同：</p>
+<ul>
+<li><strong>握手前进程里没有证书</strong>。登录后、任何握手前抓全内存，证书 DER 与模数命中数为 0。</li>
+<li><strong>握手时证书只出现在发送缓冲区</strong>。命中位置能看到完整 TLS 记录：<code>16 03 03 … 0b</code> 加证书消息。</li>
+<li><strong>私钥不驻留</strong>。握手后按 OpenSSL BIGNUM 的 64 位和 32 位小端两种排布搜模数，命中数为 0。</li>
+<li><strong>握手期间零文件 I&#x2F;O</strong>。挂 <code>NtCreateFile</code>，握手前后调用计数完全不变。</li>
+<li><strong>握手期间没有网络收发</strong>。把微信出站整个封掉，握手照样完成。</li>
+<li><strong>不走 Windows 证书体系</strong>。<code>CryptAcquireCertificatePrivateKey</code>、<code>CryptSignHashW</code>、<code>BCryptSignHash</code> 调用次数均为 0；<code>Cert:\CurrentUser\My</code> 与 <code>LocalMachine\My</code> 里也没有这张证书。</li>
+<li><strong>登录阶段也看不到证书明文</strong>。扫描 68,000 多次堆分配，用 DER、PEM、以及该证书独有的 base64 指纹三种编码检索，命中数为 0。</li>
+</ul>
+<p>由这些事实可以推出：证书与私钥在客户端登录阶段以非明文形式进入进程，每次握手时临时解出、签名、清掉。磁盘、注册表、证书存储、钥匙串里都没有它，但每次握手都能完成。</p>
+<h2 id="安全边界"><a href="#安全边界" class="headerlink" title="安全边界"></a>安全边界</h2><ul>
+<li>页面能拿到的只有 <code>authorize_uuid</code> 和最终的 <code>code</code>。<code>code</code> 由服务端签发，本地服务伪造不了。</li>
+<li>本地 HTTPS 解决两件事：让页面确认「对面是不是微信」，以及让这段跨源请求落在浏览器认可的安全上下文里。账号认证仍然由服务端完成。</li>
+<li>由于私钥全客户端共用，它保护的是回环地址上的一个身份，不是用户凭证。</li>
+<li>快捷登录依赖客户端登录态，客户端没登录时，页面只能退回扫码。</li>
+</ul>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>这条链路可以压缩成一句话：<strong>页面按约定端口找到本机微信，本机微信把已登录账号换成一张一次性票据，服务端再把票据换成 code，最后由网站后端兑换凭证。</strong></p>
+<p>端口开不开取决于桌面客户端是否登录；域名和证书则用来在这个谁都能占用的回环端口上，证明对面确实是微信。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://blog.aiyi.space/2026/11/20/wechat-browser-login/" data-id="cmwpuf5a8000ba0vq8d98d97n" data-title="微信浏览器快捷登录：按流程拆解" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%BE%AE%E4%BF%A1/" rel="tag">微信</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%B5%8F%E8%A7%88%E5%99%A8/" rel="tag">浏览器</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E7%99%BB%E5%BD%95/" rel="tag">登录</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%80%86%E5%90%91%E5%88%86%E6%9E%90/" rel="tag">逆向分析</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2026/07/23/The-Third-Pillar-of-the-AI-Age/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">The Third Pillar of the AI Age</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2026 Hunter<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+<script src="/js/dark-mode.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

@@ -1,6 +1,18 @@
 (function () {
   var mermaidBlocks = new Map();
 
+  // The existing theme stylesheet constrains SVGs to the viewport, which
+  // makes multi-column sequence diagrams unreadable on phones. Keep a
+  // readable intrinsic width and let the article container scroll instead.
+  var style = document.createElement('style');
+  style.textContent = [
+    '.article-entry pre.mermaid-diagram{background:#fff!important;border:0;box-shadow:none;overflow-x:auto;-webkit-overflow-scrolling:touch;text-align:left;padding:1em;border-radius:4px}',
+    '.article-entry pre.mermaid-diagram code.mermaid{display:block;background:transparent!important;padding:0;white-space:normal}',
+    '.article-entry pre.mermaid-diagram svg{display:block;height:auto;width:auto!important;max-width:none!important;min-width:900px;margin:0 auto}',
+    'body.dark-mode .article-entry pre.mermaid-diagram{background:#202124!important}'
+  ].join('\n');
+  document.head.appendChild(style);
+
   function collectMermaidBlocks() {
     document.querySelectorAll('code.mermaid').forEach(function (element) {
       if (!mermaidBlocks.has(element)) {
@@ -19,7 +31,28 @@
     window.mermaid.initialize({
       startOnLoad: false,
       securityLevel: 'strict',
-      theme: document.body.classList.contains('dark-mode') ? 'dark' : 'default'
+      theme: document.body.classList.contains('dark-mode') ? 'dark' : 'default',
+      themeVariables: {
+        fontSize: '18px',
+        actorBkg: '#f0edff',
+        actorBorder: '#6554a4',
+        actorTextColor: '#171717',
+        signalColor: '#333333',
+        signalTextColor: '#171717',
+        labelBoxBkgColor: '#fff4bf',
+        labelBoxBorderColor: '#8a6d00',
+        labelTextColor: '#171717',
+        noteBkgColor: '#fff4bf',
+        noteBorderColor: '#8a6d00',
+        noteTextColor: '#171717'
+      },
+      sequence: {
+        actorFontSize: 18,
+        messageFontSize: 17,
+        noteFontSize: 16,
+        messageMargin: 30,
+        actorMargin: 55
+      }
     });
 
     var nodes = Array.from(mermaidBlocks.keys());

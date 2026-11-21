@@ -264,6 +264,22 @@ body {
 .article-entry dt {
   font-weight: bold;
 }
+.article-entry pre.mermaid-diagram {
+  background: transparent;
+  border: 0;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  overflow-x: auto;
+  text-align: center;
+}
+.article-entry pre.mermaid-diagram code.mermaid {
+  display: block;
+  white-space: normal;
+}
+.article-entry pre.mermaid-diagram code.mermaid svg {
+  height: auto;
+  max-width: 100%;
+}
 #header {
   height: 300px;
   position: relative;

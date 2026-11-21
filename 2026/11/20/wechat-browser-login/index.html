@@ -119,7 +119,28 @@
 <p>微信网页登录有两种形态：扫码，和「本机已登录，直接授权」。后者不经过二维码，靠的是一个只监听 <code>127.0.0.1</code> 的 HTTPS 服务。本文按流程图的顺序，一步一步拆这条链路。</p>
 <span id="more"></span>
 
-<h2 id="全流程"><a href="#全流程" class="headerlink" title="全流程"></a>全流程</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">  participant U as 用户</span><br><span class="line">  participant P as 网站页面</span><br><span class="line">  participant L as 本机微信</span><br><span class="line">  participant W as 微信服务端</span><br><span class="line">  participant B as 网站后端</span><br><span class="line"></span><br><span class="line">  Note over L: 第 0 步（前提）桌面客户端已登录</span><br><span class="line">  U-&gt;&gt;P: 第 1 步 点击「微信登录」</span><br><span class="line">  P-&gt;&gt;P: 第 1 步 创建 iframe</span><br><span class="line">  P-&gt;&gt;L: 第 2 步 探测 14013 / 14014 / 14015</span><br><span class="line">  P-&gt;&gt;L: 第 3 步 TLS 握手</span><br><span class="line">  P-&gt;&gt;L: 第 4 步 POST /api/check-login</span><br><span class="line">  L--&gt;&gt;P: 第 5 步 昵称、头像、authorize_uuid</span><br><span class="line">  U-&gt;&gt;P: 第 6 步 点击「快速登录」</span><br><span class="line">  P-&gt;&gt;L: 第 7 步 POST /api/authorize</span><br><span class="line">  L-&gt;&gt;W: 第 8 步 MMTLS 转发授权</span><br><span class="line">  W--&gt;&gt;L: 第 8 步 授权结果</span><br><span class="line">  L--&gt;&gt;P: 第 9 步 redirect_url（含 code）</span><br><span class="line">  P-&gt;&gt;B: 第 10 步 跳转 redirect_uri</span><br><span class="line">  B-&gt;&gt;W: 第 11 步 用 code 换 access_token</span><br><span class="line">  W--&gt;&gt;B: 第 11 步 返回 openid</span><br></pre></td></tr></table></figure>
+<h2 id="全流程"><a href="#全流程" class="headerlink" title="全流程"></a>全流程</h2><pre class="mermaid-diagram"><code class="mermaid">sequenceDiagram
+  participant U as 用户
+  participant P as 网站页面
+  participant L as 本机微信
+  participant W as 微信服务端
+  participant B as 网站后端
+
+  Note over L: 第 0 步（前提）桌面客户端已登录
+  U-&gt;&gt;P: 第 1 步 点击「微信登录」
+  P-&gt;&gt;P: 第 1 步 创建 iframe
+  P-&gt;&gt;L: 第 2 步 探测 14013 &#x2F; 14014 &#x2F; 14015
+  P-&gt;&gt;L: 第 3 步 TLS 握手
+  P-&gt;&gt;L: 第 4 步 POST &#x2F;api&#x2F;check-login
+  L--&gt;&gt;P: 第 5 步 昵称、头像、authorize_uuid
+  U-&gt;&gt;P: 第 6 步 点击「快速登录」
+  P-&gt;&gt;L: 第 7 步 POST &#x2F;api&#x2F;authorize
+  L-&gt;&gt;W: 第 8 步 MMTLS 转发授权
+  W--&gt;&gt;L: 第 8 步 授权结果
+  L--&gt;&gt;P: 第 9 步 redirect_url（含 code）
+  P-&gt;&gt;B: 第 10 步 跳转 redirect_uri
+  B-&gt;&gt;W: 第 11 步 用 code 换 access_token
+  W--&gt;&gt;B: 第 11 步 返回 openid</code></pre>
 
 <p>下面逐步说明每一步在做什么、为什么必须这么做。</p>
 <h2 id="第-0-步（前提）：桌面客户端处于登录态"><a href="#第-0-步（前提）：桌面客户端处于登录态" class="headerlink" title="第 0 步（前提）：桌面客户端处于登录态"></a>第 0 步（前提）：桌面客户端处于登录态</h2><p>这一步不在图里，但它是整条链路的前提。</p>
@@ -233,7 +254,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://blog.aiyi.space/2026/11/20/wechat-browser-login/" data-id="cmwpuf5a8000ba0vq8d98d97n" data-title="微信浏览器快捷登录：按流程拆解" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="https://blog.aiyi.space/2026/11/20/wechat-browser-login/" data-id="cmwpvv7wc000b0kvqfhjye3pl" data-title="微信浏览器快捷登录：按流程拆解" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -296,6 +317,10 @@
 
 
 <script src="/js/dark-mode.js"></script>
+
+
+<script src="/js/mermaid-init.js"></script>
+
 
 
 
